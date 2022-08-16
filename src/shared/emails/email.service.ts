@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
+import { Logger } from '@nestjs/common';
+
 import {
   EmailEvents,
   ConfirmationEmail,
@@ -17,9 +19,12 @@ import { UserInfofromToken } from 'src/common/interfaces/auth.interface';
 
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
+
   constructor(@InjectQueue('mails') private mailQueue: Queue) {}
 
   async enQueueMail(type: EmailEvents, job) {
+    this.logger.log(`${type} job for ${job.user.email} added to queue`);
     this.mailQueue.add(type, job);
   }
 

@@ -50,10 +50,14 @@ export class EmailConsumer {
 
   @Process(ConfirmationEmail)
   processUserAccountConfirmationEmail(job: Job<AccountConfirmationEmailJob>) {
-    this.mailerService.sendMail({
-      to: job.data.user.email,
-      html: ``,
-    });
+    try {
+      this.mailerService.sendMail({
+        to: job.data.user.email,
+        html: ``,
+      });
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 
   // @Process(ResetPasswordEmail)

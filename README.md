@@ -77,3 +77,8 @@ The architecture follows domai driven design principles(at least where its makes
 - `src/users` User related functionality
 
 - `src/config` application configuration
+
+## Open API spec
+
+Open API specfication UI is can accessed via the `/docs` endpoint. The actual specification is automatically
+created from DTOs and @nestjs/swagger decorators
