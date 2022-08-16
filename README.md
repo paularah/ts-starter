@@ -58,16 +58,22 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+## Architecture
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+The architecture follows domai driven design principles(at least where its makes sense in the context of Nest.js and the size of the project).
 
-## Stay in touch
+- `/helm` helm templates for kubernetes
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- `/.github` github actions
 
-## License
+- `src/shared` modules shared accross domains live here
 
-Nest is [MIT licensed](LICENSE).
+- `src/common` common building blocks like interceptors, filters, etc. This do not nessarilly belong to any domin
+
+- `src/auth` Authencation related functionality(module lives here)
+
+- `src/auth` Mailing functionality lives here. Mail are queue using Bull
+
+- `src/users` User related functionality
+
+- `src/config` application configuration
