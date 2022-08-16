@@ -1,4 +1,9 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ConfigType } from '@nestjs/config';
@@ -26,4 +31,21 @@ export class UsersService {
     const user = new this.userRepository(createUserDto);
     return user.save();
   }
+
+  async confirmUser(userInfo) {
+    const user = await this.userRepository
+      .findOneAndUpdate(
+        { _id: userInfo.id },
+        { $set: { active: true } },
+        { new: true },
+      )
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('unable to find user');
+    }
+  }
+  async getUserFromEmail(email: string) {}
+
+  // async updateUserPassword(email);
 }

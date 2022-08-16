@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, HttpException, Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { InjectRedis, DEFAULT_REDIS_NAMESPACE } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { ConfirmUserAccountDto } from 'src/users/dto/confirm-user.dto';
 import { EmailService } from 'src/shared/emails/email.service';
 import { UserInfofromToken } from 'src/common/interfaces/auth.interface';
 
@@ -24,8 +25,14 @@ export class AuthService {
     return token;
   }
 
-  async getUserAccountConfirmationToken(token: string) {
-    const userInfo = this.redis.get(token);
+  async inValidateUserToken(token: string) {
+    await this.redis.del(token);
+  }
+
+  async getUserAccountConfirmationToken(
+    token: string,
+  ): Promise<string | undefined> {
+    return JSON.parse(await this.redis.get(token));
   }
 
   //   async createUserPasswordResetToken() {}
@@ -35,7 +42,7 @@ export class AuthService {
   async registerUserAcount(createUserDto: CreateUserDto) {
     const user = await this.userService.createUser(createUserDto);
     const userinfo = {
-      id: user.id,
+      id: user._id.toString(),
       email: user.email,
       firstname: user.firstname,
     };
@@ -44,6 +51,20 @@ export class AuthService {
     );
     this.emailService.sendAccountConfirmationEmail(activationToken, userinfo);
     return { token: activationToken };
+  }
+
+  async confirmUserRegistration(confirmUserAccountDto: ConfirmUserAccountDto) {
+    const userInfo = await this.getUserAccountConfirmationToken(
+      confirmUserAccountDto.token,
+    );
+
+    if (!userInfo) {
+      throw new ConflictException('Invalid or expired link');
+    }
+
+    this.userService.confirmUser(userInfo);
+    await this.inValidateUserToken(confirmUserAccountDto.token);
+    return {};
   }
 
   //   async loginUser() {}
